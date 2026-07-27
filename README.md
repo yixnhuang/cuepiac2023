@@ -71,5 +71,8 @@ organizers remain under their respective rights and licenses.
 
 ## Contact
 
+For questions or collaboration, use the contact details below or consult the
+website for the latest information.
+
 - Website: [yixuanhuang.com](https://yixuanhuang.com)
 - Email: [yixnhuang@gmail.com](mailto:yixnhuang@gmail.com)
