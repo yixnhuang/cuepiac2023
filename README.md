@@ -1,78 +1,99 @@
-# Autonomous Vehicle Simulation CUEPIAC 2023
+# Autonomous Vehicle Simulation — CUEPIAC 2023
 
-An autonomous-driving simulation project awarded First Prize at CUEPIAC 2023.
-It combines environment perception, path planning, and vehicle control for
-competition scenarios on the official simulation platform.
+A rule-based autonomous-driving stack written for the 51Sim-One simulation
+platform used by CUEPIAC 2023. It reads simulated GPS, obstacle and traffic
+signal data, queries the HD map for lanes and routes, runs an eight-state
+driving state machine, and returns throttle, brake and steering through the
+competition SDK. Awarded First Prize.
 
 [![License](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
-[![Status](https://img.shields.io/badge/Status-Complete-success.svg)](#project-status)
+[![Status](https://img.shields.io/badge/Status-Archived-lightgrey.svg)](#project-status)
 [![Award](https://img.shields.io/badge/Award-First%20Prize-gold.svg)](#recognition)
-[![C++](https://img.shields.io/badge/C%2B%2B-17-informational.svg)](#key-technologies)
+[![C++](https://img.shields.io/badge/C%2B%2B-14-informational.svg)](#building)
+[![Platform](https://img.shields.io/badge/Platform-51Sim--One%20(Windows)-orange.svg)](#requirements)
 
 ## Overview
 
+![One tick of the control loop: perception, decision, planning and control, with the driving state machine choosing the target speed](figures/architecture.svg)
+
+*Four hand-written layers over simulator ground truth, driven by the driving state machine.*
+
 This repository preserves the final implementation developed for the **China
-Undergraduate Engineering Practice and Innovation Ability Competition (CUEPIAC
-2023)**. The system interprets simulated road conditions, selects appropriate
-driving behavior, and executes control decisions using the competition SDK.
+Undergraduate Engineering Practice and Innovation Ability Competition
+(CUEPIAC 2023)**, autonomous-driving simulation track.
+
+The system is a single-threaded control loop. Every tick it pulls the vehicle
+state and the obstacle list from the simulator, resolves the current lane and
+the remaining route against the HD map, decides what driving behaviour applies,
+generates a short target path, and tracks that path with a pure-pursuit
+steering law and a PID speed controller.
+
+It is a **classical, fully hand-written stack**. Behaviour is expressed as
+explicit predicates over map geometry and obstacle geometry, and every decision
+the car makes can be traced to a named function.
 
 ## Recognition
 
-- First Prize, CUEPIAC 2023.
+First Prize, CUEPIAC 2023.
 
-## Project Objectives
+## Repository layout
 
-- **Intelligent Decision Making**: The system simulates a vehicle that can intelligently assess road conditions and make driving decisions using built-in sensors and algorithms.
-- **Road Condition Recognition**: The vehicle can automatically adjust its behavior based on various road conditions, such as obstacles, traffic signs, and other environmental factors.
-- **Autonomous Driving Simulation**: The project models the behavior of an autonomous vehicle within a controlled simulation environment to evaluate its decision-making algorithms.
+```text
+.
+├── Impl/                 # All first-party code
+│   ├── app/autodrive.cpp #   main loop and driving state machine (~1.1k lines)
+│   ├── perception/       #   obstacle, sign and traffic-light interpretation
+│   ├── planning/         #   reference path, lane-change paths, Bézier smoothing
+│   ├── decision/         #   lane-change legality, junction and stop-line logic
+│   ├── control/          #   PID speed controller
+│   ├── common/           #   shared types and the headers for the three layers
+│   └── util/             #   math, string, sign-type and driver helpers
+├── include/              # Third-party headers: 51Sim-One SDK and Eigen 3.2.3
+├── WinLibs/              # Third-party Windows binaries shipped by the SDK
+├── CMakeLists.txt
+└── LICENSE
+```
 
-## Features
+First-party code is roughly 3,900 lines across 20 files in `Impl/`. Everything
+under `include/` and `WinLibs/` is third-party and keeps its own licence.
 
-- **Real-time Road Condition Assessment**: The vehicle continuously monitors its surroundings and makes decisions in real-time based on predefined road scenarios.
-- **Driving Decision Algorithms**: Implemented algorithms for safe and efficient driving decisions, including stopping, turning, or accelerating, depending on the road environment.
-- **Simulation Environment**: The project runs in a simulated environment, mimicking real-world driving scenarios with varying road conditions and obstacles.
+## Requirements
 
-## Key Technologies
+- Windows, and the official 51Sim-One simulation platform supplied by the
+  competition organisers. The binary links against that SDK and cannot be run
+  or meaningfully tested without it.
+- CMake 3.26 or newer.
+- A C++14 toolchain (MSVC was used).
 
-- **Simulated Vehicle Model**: A simplified model of an intelligent connected vehicle that simulates sensors, road recognition, and decision-making.
-- **Autonomous Driving Algorithms**: Algorithms for vehicle decision-making, including obstacle detection and traffic management, based on simulated data.
+The simulator itself is not distributed here and is not publicly available.
 
-## How to Run
+## Building
 
-1. **Clone the repository**:
-    ```bash
-    git clone https://github.com/yixnhuang/cuepiac2023.git
-    ```
+```bash
+cmake -S . -B build
+cmake --build build --config Release
+```
 
-2. **Access the Competition Platform to Run**:
-    - You will need access to the official simulation platform provided by the competition organizers. This is the only environment where the simulation can be run.
-    - Please refer to the official competition guidelines for detailed instructions on how to access the platform.
+The executable is written to `Release/` and the SDK DLLs are copied next to it
+by a post-build step.
 
 ## Project Status
 
-Complete. This repository preserves the final competition implementation and is
-not under active development.
+Archived. The competition submission as it stood at the end of CUEPIAC 2023,
+with later comment cleanup.
 
 ## License
 
 Copyright 2023 Yixuan Huang
 
-This project is licensed under the Apache License, Version 2.0.
-See the [LICENSE](LICENSE) file for details.
+First-party source code, design files and documentation in this repository are
+licensed under the Apache License, Version 2.0 — see [LICENSE](LICENSE).
 
-Unless otherwise stated, this license applies only to the original source code,
-design files, documentation, and project materials created for this project.
-
-Competition platforms, official competition materials, third-party resources,
-external tools, screenshots, and any materials provided by the competition
-organizers remain under their respective rights and licenses.
-
----
+The competition SDK headers and binaries, the Eigen headers, the FFmpeg
+binaries, and all other third-party material remain under their own licenses
+and are **not** covered by this repository's license.
 
 ## Contact
-
-For questions or collaboration, use the contact details below or consult the
-website for the latest information.
 
 - Website: [yixuanhuang.com](https://yixuanhuang.com)
 - Email: [yixnhuang@gmail.com](mailto:yixnhuang@gmail.com)
